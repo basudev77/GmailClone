@@ -3,6 +3,10 @@ import { RxCross2 } from 'react-icons/rx'
 import { useSelector } from 'react-redux'
 import { setOpen } from '../redux/appSlice';
 import { useDispatch } from 'react-redux';
+import { addDoc } from 'firebase/firestore';
+import { db } from '../firebase';
+import { collection, serverTimestamp } from 'firebase/firestore';
+
 
 
 
@@ -20,9 +24,20 @@ function SendMail() {
     setFormData({...formData,[e.target.name]: e.target.value});
   }
 
-  const submitHandler = (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
-    console.log(formData);
+    await addDoc(collection(db, 'emails'), {
+      to: formData.to,
+      subject: formData.subject,
+      message: formData.message,
+      createdAt: serverTimestamp()
+    });
+    dispatch(setOpen(false));
+    setFormData({
+      to: '',
+      subject: '',
+      message: ''
+    });
   }
 
   return (
