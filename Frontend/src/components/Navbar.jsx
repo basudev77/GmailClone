@@ -7,14 +7,28 @@ import { RxHamburgerMenu } from "react-icons/rx";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setSearchText } from "../redux/appSlice";
+import { AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import { signOut } from "firebase/auth";
+import { auth } from "../firebase";
+import { setUser } from "../redux/appSlice";
+import { useSelector } from "react-redux";
+
 
 
 function Navbar() {
   const [input, setInput] = useState("");
-    const dispatch = useDispatch();
+  const {user} = useSelector(store => store.appSlice);
+  const dispatch = useDispatch();
   useEffect(() => {
     dispatch(setSearchText(input));
-  },[input]);
+  }, [input]);
+  const [toggle, setToggle] = useState(false);
+  const signOutHandler = () => {
+    signOut(auth).then(() => {
+      dispatch(setUser(null));
+    }).catch(err => console.log(err));
+  };
 
   return (
     <div className="flex items-center justify-between mx-3 h-16">
@@ -54,12 +68,25 @@ function Navbar() {
           <div className="p-3 rounded-full hover:bg-gray-100 cursor-pointer">
             <PiDotsNineBold size={"20px"} />
           </div>
-          <div className="cursor-pointer">
+          <div className="relative cursor-pointer">
             <Avatar
-              src="https://tse3.mm.bing.net/th?id=OIP.yHjEfYkKVKI4HefomX2A6wHaHa&pid=Api&P=0&h=180"
+              onClick={() => setToggle(!toggle)}
+              src={user?.photoURL}
               size="40"
               round={true}
             />
+            <AnimatePresence>
+              {toggle && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.1 }}
+                  className="absolute right-2 z-20 bg-white shadow-lg rounded-md">
+                <p onClick={signOutHandler} className="p-2 underline">LogOut</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>

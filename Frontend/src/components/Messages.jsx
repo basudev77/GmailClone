@@ -8,13 +8,14 @@ import { collection, onSnapshot, query, orderBy } from 'firebase/firestore'
 
 function Messages() {
   const dispatch = useDispatch();
-  const {emails, searchText} = useSelector(store => store.appSlice);
-  const [tempEmails, setTempEmails] = useState(emails);
+  const emails = useSelector(store => store.appSlice.emails);
+  const searchText = useSelector(store => store.appSlice.searchText);
+  const [tempEmails, setTempEmails] = useState([]);
 
   useEffect(() => {
     const q = query(collection(db, "emails"), orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(collection(db, "emails"), (snapshot) => {
-      const allEmails = snapshot.docs.map((doc) => ({...doc.data(), id: doc.id}));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const allEmails = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
       dispatch(setEmails(allEmails));
     });
     //cleanup
